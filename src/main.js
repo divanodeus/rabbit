@@ -3,6 +3,8 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import "./plugins/element.js";
+import "ress";
+import "./style/index.less";
 
 Vue.config.productionTip = false;
 
