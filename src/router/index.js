@@ -8,18 +8,44 @@ const routes = [
   {
     path: "/",
     name: "Index",
-    component: Index
+    redirect: "home",
+    component: Index,
+    children: [
+      {
+        path: "home",
+        name: "Home",
+        // route level code-splitting
+        // this generates a separate chunk (home.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: function() {
+          return import(/* webpackChunkName: "home" */ "../views/Home.vue");
+        }
+      },
+      {
+        path: "statement",
+        name: "Statement",
+        component: function() {
+          return import(
+            /* webpackChunkName: "statement" */ "../views/Statement.vue"
+          );
+        }
+      },
+      {
+        path: "remind",
+        name: "Remind",
+        component: function() {
+          return import(/* webpackChunkName: "remind" */ "../views/Remind.vue");
+        }
+      },
+      {
+        path: "manage",
+        name: "Manage",
+        component: function() {
+          return import(/* webpackChunkName: "manage" */ "../views/Manage.vue");
+        }
+      }
+    ]
   }
-  // {
-  //   path: "/about",
-  //   name: "About",
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: function() {
-  //     return import(/* webpackChunkName: "about" */ "../views/About.vue");
-  //   }
-  // }
 ];
 
 const router = new VueRouter({
