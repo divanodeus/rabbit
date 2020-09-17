@@ -8,8 +8,8 @@ module.exports = {
   },
   pluginOptions: {
     electronBuilder: {
+      externals: ["sequelize"],
       builderOptions: {
-        externals: ["sequelize"],
         extraFiles: ["rabbit.db"],
         win: {
           icon: "./public/app.ico"

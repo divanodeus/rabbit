@@ -163,7 +163,6 @@ export default {
 
   methods: {
     async search() {
-      console.log(this.params);
       this.tableData = await this.service.findAllWhere(this.params);
     },
     handleDbClick(row) {
