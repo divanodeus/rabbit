@@ -1,0 +1,50 @@
+.loop(@n, @i: 1) when (@i =< @n) {
+  .pa@{i} {
+    padding: 4px * @i;
+  }
+  .pt@{i} {
+    padding-top: 4px * @i;
+  }
+  .pb@{i} {
+    padding-bottom: 4px * @i;
+  }
+  .pl@{i} {
+    padding-left: 4px * @i;
+  }
+  .pr@{i} {
+    padding-right: 4px * @i;
+  }
+  .px@{i} {
+    padding-left: 4px * @i;
+    padding-right: 4px * @i;
+  }
+  .py@{i} {
+    padding-top: 4px * @i;
+    padding-bottom: 4px * @i;
+  }
+  .ma@{i} {
+    margin: 4px * @i;
+  }
+  .mt@{i} {
+    margin-top: 4px * @i;
+  }
+  .mb@{i} {
+    margin-bottom: 4px * @i;
+  }
+  .ml@{i} {
+    margin-left: 4px * @i;
+  }
+  .mr@{i} {
+    margin-right: 4px * @i;
+  }
+  .mx@{i} {
+    margin-left: 4px * @i;
+    margin-right: 4px * @i;
+  }
+  .my@{i} {
+    margin-top: 4px * @i;
+    margin-bottom: 4px * @i;
+  }
+  .loop(@n, (@i + 1));
+}
+.loop(12);

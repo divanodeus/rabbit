@@ -17,7 +17,9 @@
   "dependencies": {
     "element-ui": "^2.4.5",
     "font-awesome": "^4.7.0",
+    "moment": "^2.28.0",
     "ress": "^3.0.0",
+    "sequelize": "^6.3.5",
     "sqlite3": "^5.0.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",

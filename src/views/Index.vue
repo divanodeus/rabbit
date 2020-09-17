@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container class="app">
     <el-header class="header">
       <el-menu
         router

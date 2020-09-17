@@ -1,4 +1,29 @@
 @import "./element-ui.less";
+@import "./display.less";
+@import "./spacing.less";
+
+html,
+body {
+  height: 100vh;
+}
+
+.app, .page {
+  height: 100%;
+}
+
+.page {
+  &-header {
+    .label {
+      min-width: 60px;
+      text-align: end;
+      color: #666;
+      font-size: 14px;
+    }
+  }
+  &-content {
+    overflow: auto;
+  }
+}
 
 .transparent {
   background-color: transparent;
