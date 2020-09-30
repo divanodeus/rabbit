@@ -9,11 +9,11 @@ const sequelize = new Sequelize({
     idle: 10000
   },
   define: {
-    freezeTableName: true,
-    timestamps: false
+    // timestamps: false,
+    freezeTableName: true
   },
   storage: "rabbit.db",
   operatorsAliases: false
 });
 
-export default sequelize;
+module.exports = sequelize;

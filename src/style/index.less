@@ -16,15 +16,44 @@ body {
     .label {
       min-width: 60px;
       text-align: end;
-      color: #666;
+      color: #606266;
       font-size: 14px;
     }
   }
   &-content {
     overflow: auto;
   }
+  .icon-button {
+    cursor: pointer;
+    border-radius: 2px;
+    transition: color,background-color 333ms;
+    &:hover {
+      color: #fff;
+      background-color: #f7889c;
+    }
+  }
 }
 
 .transparent {
   background-color: transparent;
+}
+
+.fa-14 {
+  font-size: 18px;
+}
+
+/* fade-transform */
+.fade-transform-leave-active,
+.fade-transform-enter-active {
+  transition: all .5s;
+}
+
+.fade-transform-enter {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
 }

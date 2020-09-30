@@ -1,5 +1,5 @@
 <template>
-  <div class="poetry">{{ poetry }}</div>
+  <div class="poetry" @contextmenu="getPoetry">{{ poetry }}</div>
 </template>
 <script>
 export default {

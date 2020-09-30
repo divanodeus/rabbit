@@ -22,11 +22,11 @@ const routes = [
         }
       },
       {
-        path: "statement",
-        name: "Statement",
+        path: "register",
+        name: "register",
         component: function() {
           return import(
-            /* webpackChunkName: "statement" */ "../views/Statement.vue"
+            /* webpackChunkName: "register" */ "../views/Register.vue"
           );
         }
       },
