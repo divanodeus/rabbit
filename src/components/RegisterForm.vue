@@ -45,13 +45,26 @@
         </el-select>
       </el-form-item>
       <el-form-item label="项目">
-        <el-autocomplete
+        <el-select
+          v-model="form.project"
+          filterable
+          default-first-option
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in projects"
+            :key="item.id"
+            :value="item.project"
+          >
+          </el-option>
+        </el-select>
+        <!-- <el-autocomplete
           v-model="form.project"
           :clearable="isAdd"
           placeholder="项目"
           value-key="project"
           :fetch-suggestions="filterProject"
-        ></el-autocomplete>
+        ></el-autocomplete> -->
       </el-form-item>
       <el-form-item label="事由">
         <el-input

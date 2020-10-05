@@ -1,8 +1,9 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, Menu } from "electron";
+import { app, protocol, BrowserWindow, Menu, dialog, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+import XLSX from "xlsx";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -92,3 +93,21 @@ if (isDevelopment) {
     });
   }
 }
+
+ipcMain.on("exportXLSX", async (event, arg) => {
+  let path = await dialog.showSaveDialog({
+    title: "导出数据",
+    defaultPath: "导出数据.xlsx"
+  });
+  if (!path.filePath) {
+    return;
+  }
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.json_to_sheet(arg);
+  XLSX.utils.book_append_sheet(workbook, worksheet);
+  XLSX.writeFile(workbook, `${path.filePath}`, {
+    bookType: "xlsx",
+    bookSST: true,
+    type: "array"
+  });
+});

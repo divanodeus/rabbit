@@ -1,13 +1,5 @@
 <template>
   <Layout>
-    <template #header>
-      <el-input
-        v-model="keywords"
-        clearable
-        placeholder="输入关键字查询"
-        size="mini"
-      ></el-input>
-    </template>
     <template #title>
       <el-tooltip
         class="item pa1 icon-button"
@@ -34,21 +26,60 @@
       <el-table-column
         v-if="this.type === 'company'"
         prop="company"
-        label="公司"
         align="center"
-      ></el-table-column>
+      >
+        <template #header>
+          <div class="flex justify-center align-center">
+            <span class="mr4">公司</span>
+            <span>
+              <el-input
+                v-model="keywords"
+                clearable
+                placeholder="输入关键字查询"
+                size="mini"
+              ></el-input>
+            </span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         v-if="this.type === 'department'"
         prop="department"
-        label="部门"
         align="center"
-      ></el-table-column>
+      >
+        <template #header>
+          <div class="flex justify-center align-center">
+            <span class="mr4">部门</span>
+            <span>
+              <el-input
+                v-model="keywords"
+                clearable
+                placeholder="输入关键字查询"
+                size="mini"
+              ></el-input>
+            </span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         v-if="this.type === 'project'"
         prop="project"
-        label="项目"
         align="center"
-      ></el-table-column>
+      >
+        <template #header>
+          <div class="flex justify-center align-center">
+            <span class="mr4">项目</span>
+            <span>
+              <el-input
+                v-model="keywords"
+                clearable
+                placeholder="输入关键字查询"
+                size="mini"
+              ></el-input>
+            </span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="remark"
         label="备注"

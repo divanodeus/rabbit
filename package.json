@@ -2,8 +2,8 @@
   "name": "rabbit",
   "version": "0.1.0",
   "private": true,
-  "author": "",
-  "description": "",
+  "author": "八宝粥",
+  "description": "给老婆做的一个软件，用来代替平时一直使用excel统计数据",
   "scripts": {
     "lint": "vue-cli-service lint",
     "electron:build": "vue-cli-service electron:build",
@@ -21,7 +21,8 @@
     "sqlite3": "^5.0.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
-    "vuex": "^3.4.0"
+    "vuex": "^3.4.0",
+    "xlsx": "^0.16.7"
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "~4.5.0",

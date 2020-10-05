@@ -2,6 +2,7 @@ const MomentLocalesPlugin = require("moment-locales-webpack-plugin");
 module.exports = {
   publicPath: "./",
   configureWebpack: {
+    target: "electron-renderer",
     externals: {
       sequelize: "commonjs sequelize",
       sqlite3: "commonjs sqlite3"

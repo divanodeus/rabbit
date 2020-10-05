@@ -2,9 +2,21 @@
 @import "./display.less";
 @import "./spacing.less";
 
+@font-face {
+  font-family: SourceHanSansCN;
+  src: url("../assets/font/SourceHanSansCN-Normal.otf");
+  font-weight: 400;
+}
+@font-face {
+  font-family: SourceHanSansCN;
+  src: url("../assets/font/SourceHanSansCN-Bold.otf");
+  font-weight: 700;
+}
+
 html,
 body {
   height: 100vh;
+  font-family: SourceHanSansCN;
 }
 
 .app, .page {
@@ -45,7 +57,7 @@ body {
 /* fade-transform */
 .fade-transform-leave-active,
 .fade-transform-enter-active {
-  transition: all .5s;
+  transition: all 333ms;
 }
 
 .fade-transform-enter {

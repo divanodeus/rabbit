@@ -22,7 +22,21 @@
         </el-col>
         <el-col :span="6" class="flex align-center">
           <span class="label">项目：</span>
-          <el-autocomplete
+          <el-select
+            v-model="params.project"
+            filterable
+            default-first-option
+            placeholder="请选择"
+            size="mini"
+          >
+            <el-option
+              v-for="item in projects"
+              :key="item.id"
+              :value="item.project"
+            >
+            </el-option>
+          </el-select>
+          <!-- <el-autocomplete
             v-model="params.project"
             size="mini"
             clearable
@@ -30,7 +44,7 @@
             value-key="project"
             :fetch-suggestions="filterProject"
           >
-          </el-autocomplete>
+          </el-autocomplete> -->
         </el-col>
         <el-col :span="12" class="flex align-center">
           <span class="label">日期：</span>
@@ -68,7 +82,7 @@
         content="导出"
         placement="top"
       >
-        <i class="el-icon-download"></i>
+        <i class="el-icon-download" @click="handleExport"></i>
       </el-tooltip>
     </template>
     <el-table
@@ -164,6 +178,7 @@
 const { Op } = require("sequelize");
 const Register = require("@/models/RegisterModel");
 const Company = require("@/models/CompanyModel");
+const { ipcRenderer } = require("electron");
 import moment from "moment";
 import pickerOptins from "@/mixins/pickerOptions";
 import Layout from "@/components/Layout";
@@ -224,6 +239,7 @@ export default {
         order: [["dateTime", "DESC"]]
       })
         .then(res => {
+          console.log(res);
           this.tableData = res;
         })
         .catch(error => {
@@ -268,6 +284,13 @@ export default {
       let companies = Array.from(cellValue, ({ company }) => company);
       companies = companies.toString().replace(/,/g, "，");
       return companies;
+    },
+
+    handleExport() {
+      ipcRenderer.send(
+        "exportXLSX",
+        JSON.parse(JSON.stringify(this.tableData))
+      );
     }
   }
 };
