@@ -1,24 +1,34 @@
-# rabbit
+# 说明
 
-## Project setup
-```
-npm install
-```
+本项目因为是给自己媳妇做的，选择的技术栈如下
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## electron
 
-### Compiles and minifies for production
-```
-npm run build
-```
+单位电脑配置一般，且不方便部署数据库和后台，关键是即便部署了，对于许多人而言，启动后台服务和数据库服务都太复杂困难，单机桌面软件是更加合适的选择
 
-### Lints and fixes files
-```
-npm run lint
-```
+### sqlite3
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+感谢sqlite，作为单机数据库而言，它是称职、合适、稳定、可靠的，并且性能不错，相对于excel来说，是质的提升。
+相对于Mysql，sqlite的部署太简单了，在只有一个用户的情况下，sqlite明显是最优解
+
+但是sqlite不支持中文排序，这太蛋疼了
+
+### sequelize
+
+作为ORM框架，使用起来免除了手写SQL，提高开发效率，并且也确实好用
+
+### dayjs
+
+Moment.js停止开发的今天，dayjs作为API相同，包体积更小的日期库，是很好的一个选择
+
+### element-ui
+
+考虑过vuetify，但是从使用习惯，以及缩短开发周期还有官方文档的完善程度来说，element-ui要好很多
+对于简单的项目而言，vuetify还是太重了
+
+### sheetjs
+
+sheetjs用于处理excel的导出，很不错的框架
+
+
+感谢所有开发者为开源的软件世界做出的贡献！
