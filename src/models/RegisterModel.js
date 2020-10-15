@@ -10,7 +10,7 @@ const Register = sequelize.define("register", {
   },
   // 时间
   dateTime: {
-    type: DataTypes.STRING
+    type: DataTypes.DATEONLY
   },
   // 项目
   project: {
@@ -46,7 +46,7 @@ const Register = sequelize.define("register", {
   }
 });
 
-Register.belongsToMany(Company, { through: "CompanyRegister" });
-Company.belongsToMany(Register, { through: "CompanyRegister" });
+Register.belongsToMany(Company, { through: "register_company" });
+Company.belongsToMany(Register, { through: "register_company" });
 
 module.exports = Register;

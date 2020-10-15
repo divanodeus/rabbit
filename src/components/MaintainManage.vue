@@ -7,7 +7,7 @@
         content="新增"
         placement="top"
       >
-        <i class="el-icon-plus" @click="handleEditEven(null)"></i>
+        <i class="el-icon-plus" @click="handleEditEven()"></i>
       </el-tooltip>
     </template>
     <el-table
@@ -23,52 +23,10 @@
         align="center"
         width="80"
       ></el-table-column>
-      <el-table-column
-        v-if="this.type === 'company'"
-        prop="company"
-        align="center"
-      >
+      <el-table-column prop="name" align="center">
         <template #header>
           <div class="flex justify-center align-center">
-            <span class="mr4">公司</span>
-            <span>
-              <el-input
-                v-model="keywords"
-                clearable
-                placeholder="输入关键字查询"
-                size="mini"
-              ></el-input>
-            </span>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        v-if="this.type === 'department'"
-        prop="department"
-        align="center"
-      >
-        <template #header>
-          <div class="flex justify-center align-center">
-            <span class="mr4">部门</span>
-            <span>
-              <el-input
-                v-model="keywords"
-                clearable
-                placeholder="输入关键字查询"
-                size="mini"
-              ></el-input>
-            </span>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        v-if="this.type === 'project'"
-        prop="project"
-        align="center"
-      >
-        <template #header>
-          <div class="flex justify-center align-center">
-            <span class="mr4">项目</span>
+            <span class="mr4">{{ name }}</span>
             <span>
               <el-input
                 v-model="keywords"
@@ -93,30 +51,49 @@
           ></el-switch>
         </template>
       </el-table-column>
+      <el-table-column label="操作" align="center" width="100">
+        <template v-slot="{ row }">
+          <el-button
+            v-if="type === 'company'"
+            size="mini"
+            type="text"
+            @click="beforeMerge(row)"
+          >
+            合并数据
+          </el-button>
+          <el-button v-else size="mini" type="text" @click="deleteRow(row)">
+            删 除
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <MaintainForm
       :type="type"
       :visible.sync="visible"
       :data="currentRow"
-      :isAdd="isAdd"
       @reload="search"
     ></MaintainForm>
+    <MergeDialog
+      :type="type"
+      :visible.sync="mergeVisible"
+      :mergeArray="mergeModels"
+      :currentData="currentRow"
+      @confirm="merge"
+    ></MergeDialog>
   </Layout>
 </template>
 <script>
+import { getModel, querySimilar, mergeRepeat } from "@/plugins/service";
 import Layout from "@/components/Layout";
 import MaintainForm from "@/components/MaintainForm";
-const typeMap = {
-  company: "SET_COMPANIES",
-  department: "SET_DEPARTMENTS",
-  project: "SET_PROJECTS"
-};
+import MergeDialog from "@/components/MergeDialog";
 export default {
   name: "CompanyManage",
 
   components: {
     Layout,
-    MaintainForm
+    MaintainForm,
+    MergeDialog
   },
 
   computed: {
@@ -128,6 +105,14 @@ export default {
       } else {
         return this.tableData;
       }
+    },
+    name() {
+      const typeMap = {
+        company: "公司",
+        department: "部门",
+        project: "项目"
+      };
+      return typeMap[this.type];
     }
   },
 
@@ -141,28 +126,17 @@ export default {
   data() {
     return {
       visible: false,
-      isAdd: false,
+      mergeVisible: false,
       tableData: [],
       currentRow: {},
       keywords: "",
-      model: null
+      model: null,
+      mergeModels: []
     };
   },
 
   created() {
-    switch (this.type) {
-      case "company":
-        this.model = require("@/models/CompanyModel");
-        break;
-      case "department":
-        this.model = require("@/models/DepartmentModel");
-        break;
-      case "project":
-        this.model = require("@/models/ProjectModel");
-        break;
-      default:
-        break;
-    }
+    this.model = getModel(this.type);
     if (this.model) {
       this.search();
     }
@@ -170,14 +144,16 @@ export default {
 
   methods: {
     search() {
-      this.model.findAll().then(res => {
-        this.tableData = res;
-        this.$store.commit(typeMap[this.type], res);
-      });
+      this.model
+        .findAll({
+          order: [["pinyin", "ASC"]]
+        })
+        .then(res => {
+          this.tableData = res;
+        });
     },
     handleEditEven(row) {
       this.currentRow = row || this.model.build();
-      this.isAdd = !row;
       this.visible = true;
     },
     changeEffective(row) {
@@ -191,6 +167,38 @@ export default {
           row.reload();
           this.$message.error("修改失败！");
         });
+    },
+    beforeMerge(row) {
+      this.currentRow = row;
+      querySimilar(this.model, this.type, row[this.type]).then(res => {
+        if (res.length) {
+          this.mergeModels = res;
+          this.mergeVisible = true;
+        } else {
+          this.$message.info(`没有找到与 ${row[this.type]} 名称相似的公司`);
+        }
+      });
+    },
+    merge(id) {
+      const t = mergeRepeat(this.currentRow.id, id);
+      t.then(() => {
+        this.search();
+        this.$message.success("合并数据成功！");
+        this.mergeVisible = false;
+      }).catch(err => {
+        this.$message.error(err.message);
+      });
+    },
+    deleteRow(row) {
+      this.$confirm(
+        `请确认是否删除 [ ${row.name} ] ？，删除本数据仅影响智能提示，不会对登记数据造成影响`,
+        "警告",
+        {
+          type: "warning"
+        }
+      ).then(res => {
+        console.log(res);
+      });
     }
   }
 };

@@ -1,35 +1,70 @@
-@import "./element-ui.less";
-@import "./display.less";
-@import "./spacing.less";
+@import './element-ui.less';
+@import './display.less';
+@import './spacing.less';
+@import './elevation.less';
 
 @font-face {
   font-family: SourceHanSansCN;
-  src: url("../assets/font/SourceHanSansCN-Normal.otf");
   font-weight: 400;
+
+  src: url('../assets/font/SourceHanSansCN-Normal.otf');
 }
 @font-face {
   font-family: SourceHanSansCN;
-  src: url("../assets/font/SourceHanSansCN-Bold.otf");
   font-weight: 700;
+
+  src: url('../assets/font/SourceHanSansCN-Bold.otf');
 }
 
 html,
 body {
-  height: 100vh;
   font-family: SourceHanSansCN;
+
+  height: 100vh;
+// 开启GPU渲染加速
+
+  transform: translate3d(0,0,0);
 }
 
-.app, .page {
+.app,
+.page,
+.height_full {
   height: 100%;
 }
 
+.window_button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+  margin-left: 10px;
+
+  cursor: pointer;
+
+  color: #fff;
+  border-radius: 2px;
+
+  transition: background-color, 333ms;
+
+  -webkit-app-region: no-drag;
+  &:hover {
+    background-color: rgba(255, 255, 255, .5);
+  }
+}
+
 .page {
+  padding: 20px;
   &-header {
     .label {
-      min-width: 60px;
-      text-align: end;
-      color: #606266;
       font-size: 14px;
+
+      min-width: 60px;
+
+      text-align: end;
+
+      color: #606266;
     }
   }
   &-content {
@@ -37,8 +72,9 @@ body {
   }
   .icon-button {
     cursor: pointer;
-    border-radius: 2px;
     transition: color,background-color 333ms;
+
+    border-radius: 2px;
     &:hover {
       color: #fff;
       background-color: #f7889c;
@@ -61,11 +97,13 @@ body {
 }
 
 .fade-transform-enter {
-  opacity: 0;
   transform: translateX(-30px);
+
+  opacity: 0;
 }
 
 .fade-transform-leave-to {
-  opacity: 0;
   transform: translateX(30px);
+
+  opacity: 0;
 }

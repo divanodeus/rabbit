@@ -9,10 +9,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  -webkit-app-region: drag;
 }
 
 .el-main {
   overflow: hidden;
+  padding: 0;
+}
+
+.el-menu {
+  -webkit-app-region: no-drag;
 }
 
 .el-menu--horizontal>.el-menu-item:not(.is-disabled):focus {

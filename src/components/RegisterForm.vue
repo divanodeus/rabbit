@@ -3,7 +3,7 @@
     <template #title>
       <el-switch
         v-model="disabled"
-        v-show="!isAdd"
+        v-show="!isNewRecord"
         active-text="开启修改"
         :active-value="false"
         :inactive-value="true"
@@ -18,7 +18,7 @@
       label-width="100px"
       label-suffix="："
     >
-      <el-form-item label="时间">
+      <el-form-item label="日期">
         <el-date-picker
           v-model="form.dateTime"
           value-format="yyyy-MM-dd"
@@ -60,7 +60,7 @@
         </el-select>
         <!-- <el-autocomplete
           v-model="form.project"
-          :clearable="isAdd"
+          :clearable="isNewRecord"
           placeholder="项目"
           value-key="project"
           :fetch-suggestions="filterProject"
@@ -69,7 +69,7 @@
       <el-form-item label="事由">
         <el-input
           v-model="form.cause"
-          :clearable="isAdd"
+          :clearable="isNewRecord"
           placeholder="事由"
         ></el-input>
       </el-form-item>
@@ -86,14 +86,14 @@
       <el-form-item label="经办人">
         <el-input
           v-model="form.transactor"
-          :clearable="isAdd"
+          :clearable="isNewRecord"
           placeholder="经办人"
         ></el-input>
       </el-form-item>
       <el-form-item label="所属部门">
         <el-autocomplete
           v-model="form.department"
-          :clearable="isAdd"
+          :clearable="isNewRecord"
           placeholder="经办人所属部门"
           value-key="department"
           :fetch-suggestions="filterDepartment"
@@ -102,7 +102,7 @@
       <el-form-item label="对方单位">
         <el-input
           v-model="form.partyB"
-          :clearable="isAdd"
+          :clearable="isNewRecord"
           placeholder="对方单位"
         ></el-input>
       </el-form-item>
@@ -118,7 +118,7 @@
     <template #footer>
       <el-button size="mini" @click="close">取 消</el-button>
       <el-button v-show="!disabled" type="primary" size="mini" @click="confirm">
-        {{ isAdd ? "新 增" : "修 改" }}
+        {{ isNewRecord ? "新 增" : "修 改" }}
       </el-button>
       <el-button v-show="disabled" type="danger" size="mini" @click="destroy">
         删 除
@@ -128,24 +128,26 @@
 </template>
 <script>
 const sequelize = require("@/plugins/sequelize");
+const Register = require("@/models/RegisterModel");
+import dayjs from "dayjs";
+import getCompanies from "@/mixins/getCompanies";
+import getDepartments from "@/mixins/getDepartments";
+import getProjects from "@/mixins/getProjects";
 export default {
   name: "RegisterForm",
 
+  mixins: [getCompanies, getDepartments, getProjects],
+
   props: {
     visible: Boolean,
-    isAdd: Boolean,
-    data: Object
-  },
-
-  computed: {
-    companies() {
-      return this.$store.state.companies;
-    },
-    departments() {
-      return this.$store.state.departments;
-    },
-    projects() {
-      return this.$store.state.projects;
+    model: {
+      type: Object,
+      default() {
+        return Register.build({
+          dateTime: dayjs().format("YYYY-MM-DD"),
+          copies: 1
+        });
+      }
     }
   },
 
@@ -153,48 +155,73 @@ export default {
     return {
       form: {},
       disabled: true,
+      isNewRecord: false,
       chosenCompanies: []
     };
   },
 
   methods: {
     init() {
-      console.log(this.departments);
-      this.form = this.data.toJSON();
-      this.disabled = !this.isAdd;
-      if (this.isAdd) {
+      this.form = this.model.toJSON();
+      this.isNewRecord = this.model.isNewRecord;
+      if (this.isNewRecord) {
         this.chosenCompanies = [];
       } else {
-        this.chosenCompanies = this.data.companies;
+        this.chosenCompanies = this.model.companies;
+      }
+      this.disabled = !this.isNewRecord;
+    },
+
+    confirm() {
+      if (this.validate()) {
+        const typeText = this.isNewRecord ? "新增" : "修改";
+        this.$confirm(
+          `请认真核对${typeText}数据！是否确认${typeText}？`,
+          "警告",
+          {
+            type: "warning"
+          }
+        ).then(async res => {
+          if (res) {
+            try {
+              await sequelize.transaction(async t => {
+                await this.model.set(this.form).save({ transaction: t });
+                await this.model.setCompanies(this.chosenCompanies, {
+                  transaction: t
+                });
+                this.$message.success(`${typeText}成功！`);
+                this.$emit("reload");
+                this.close();
+              });
+            } catch (error) {
+              console.log(error);
+              this.$message.error(`${typeText}失败！`);
+            }
+          }
+        });
       }
     },
-    confirm() {
-      const typeText = this.isAdd ? "新增" : "修改";
-      this.$confirm(
-        `请认真核对${typeText}数据！是否确认${typeText}？`,
-        "警告",
-        {
-          type: "warning"
-        }
-      ).then(async res => {
-        if (res) {
-          try {
-            await sequelize.transaction(async t => {
-              await this.data.set(this.form).save({ transaction: t });
-              await this.data.setCompanies(this.chosenCompanies, {
-                transaction: t
-              });
-              this.$message.success(`${typeText}成功！`);
-              this.$emit("reload");
-              this.close();
-            });
-          } catch (error) {
-            console.log(error);
-            this.$message.error(`${typeText}失败！`);
-          }
-        }
-      });
+
+    validate() {
+      if (!this.form.dateTime) {
+        this.$message.warning("请选择日期！");
+        return;
+      }
+      if (!this.chosenCompanies.length) {
+        this.$message.warning("请选择公司！");
+        return;
+      }
+      if (!this.form.transactor) {
+        this.$message.warning("请输入经办人姓名！");
+        return;
+      }
+      if (!this.form.cause) {
+        this.$message.warning("请输入盖章事由！");
+        return;
+      }
+      return true;
     },
+
     destroy() {
       this.$confirm("请确认本数据！是否确认删除？", "警告", {
         type: "warning"
@@ -202,8 +229,8 @@ export default {
         if (res) {
           try {
             await sequelize.transaction(async t => {
-              await this.data.setCompanies([], { transaction: t });
-              await this.data.destroy({ transaction: t });
+              await this.model.setCompanies([], { transaction: t });
+              await this.model.destroy({ transaction: t });
             });
             this.$message.success("删除成功！");
             this.$emit("reload");
@@ -215,9 +242,11 @@ export default {
         }
       });
     },
+
     close() {
       this.$emit("update:visible", false);
     },
+
     filterProject(keywords, cb) {
       if (keywords) {
         var results = this.projects.filter(data => {
@@ -228,6 +257,7 @@ export default {
         cb(this.projects);
       }
     },
+
     filterDepartment(keywords, cb) {
       if (keywords) {
         var results = this.departments.filter(data => {

@@ -1,5 +1,10 @@
 <template>
-  <Layout>
+  <Layout
+    v-loading="loading"
+    :element-loading-text="loadingText"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)"
+  >
     <template #header>
       <el-row :gutter="20">
         <el-col :span="6" class="flex align-center">
@@ -36,15 +41,6 @@
             >
             </el-option>
           </el-select>
-          <!-- <el-autocomplete
-            v-model="params.project"
-            size="mini"
-            clearable
-            placeholder="项目"
-            value-key="project"
-            :fetch-suggestions="filterProject"
-          >
-          </el-autocomplete> -->
         </el-col>
         <el-col :span="12" class="flex align-center">
           <span class="label">日期：</span>
@@ -74,7 +70,15 @@
         content="新增"
         placement="top"
       >
-        <i class="el-icon-plus" @click="handleEditEven(null)"></i>
+        <i class="el-icon-plus" @click="handleEditEven()"></i>
+      </el-tooltip>
+      <el-tooltip
+        class="item pa1 icon-button"
+        effect="dark"
+        content="导入"
+        placement="top"
+      >
+        <i class="el-icon-download" @click="handleImport"></i>
       </el-tooltip>
       <el-tooltip
         class="item pa1 icon-button"
@@ -82,7 +86,7 @@
         content="导出"
         placement="top"
       >
-        <i class="el-icon-download" @click="handleExport"></i>
+        <i class="el-icon-upload2" @click="handleExport"></i>
       </el-tooltip>
     </template>
     <el-table
@@ -101,7 +105,7 @@
       ></el-table-column>
       <el-table-column
         prop="dateTime"
-        label="时间"
+        label="日期"
         align="center"
         width="120"
       ></el-table-column>
@@ -156,6 +160,7 @@
         label="对方单位"
         header-align="center"
         min-width="200"
+        show-overflow-tooltip
       >
       </el-table-column>
       <el-table-column
@@ -168,19 +173,18 @@
     </el-table>
     <RegisterForm
       :visible.sync="visible"
-      :data="currentRow"
-      :isAdd="isAdd"
+      :model="currentRow"
       @reload="search"
     ></RegisterForm>
   </Layout>
 </template>
 <script>
-const { Op } = require("sequelize");
-const Register = require("@/models/RegisterModel");
-const Company = require("@/models/CompanyModel");
 const { ipcRenderer } = require("electron");
-import moment from "moment";
+import { queryRegister } from "@/plugins/service";
+import _dayjs from "@/plugins/dayjs";
 import pickerOptins from "@/mixins/pickerOptions";
+import getCompanies from "@/mixins/getCompanies";
+import getProjects from "@/mixins/getProjects";
 import Layout from "@/components/Layout";
 import RegisterForm from "@/components/RegisterForm";
 export default {
@@ -191,92 +195,59 @@ export default {
     RegisterForm
   },
 
-  mixins: [pickerOptins],
-
-  computed: {
-    companies() {
-      return this.$store.state.companies;
-    },
-    projects() {
-      return this.$store.state.projects;
-    }
-  },
+  mixins: [pickerOptins, getCompanies, getProjects],
 
   data() {
     return {
       visible: false,
-      isAdd: false,
+      loading: false,
+      loadingText: "",
       params: {
-        project: "",
         dateTime: []
       },
       chosenCompanies: [],
       tableData: [],
-      currentRow: {}
+      currentRow: {},
+      companies: [],
+      projects: []
     };
+  },
+
+  created() {
+    this.params.dateTime = _dayjs.thisMonth();
   },
 
   mounted() {
     this.search();
+    ipcRenderer.on("processXLSX", (event, arg) => {
+      if (!arg || typeof arg === "number") {
+        this.loading = false;
+        this.loadingText = "";
+        if (arg === 200) {
+          this.initCompanies();
+          this.search();
+        }
+      } else {
+        if (!this.loading) this.loading = true;
+        this.loadingText = arg;
+      }
+    });
   },
 
   methods: {
     search() {
-      const params = this.handleParams(this.params);
-      const include = {
-        model: Company,
-        where: {
-          id: {
-            [Op.or]: this.chosenCompanies
-          }
-        },
-        attributes: ["id", "company"],
-        through: { attributes: [] }
-      };
-      Register.findAll({
-        include,
-        where: params,
-        order: [["dateTime", "DESC"]]
-      })
+      queryRegister(this.params, this.chosenCompanies)
         .then(res => {
-          console.log(res);
           this.tableData = res;
         })
         .catch(error => {
-          console.log(error);
           this.$message.error(error.message);
         });
     },
+
     handleEditEven(row) {
-      this.currentRow =
-        row ||
-        Register.build({ dateTime: moment().format("YYYY-MM-DD"), copies: 1 });
-      this.isAdd = !row;
+      this.currentRow = row;
       this.visible = true;
-    },
-
-    handleParams(obj) {
-      let params = {};
-      if (obj.project) {
-        params.project = { [Op.substring]: obj.project };
-      }
-      if (obj.dateTime && obj.dateTime.length) {
-        params.dateTime = {
-          [Op.between]: obj.dateTime
-        };
-      }
-      return params;
-    },
-
-    filterProject(keywords, cb) {
-      if (keywords) {
-        var results = this.projects.filter(data => {
-          return data.project.includes(keywords);
-        });
-        cb(results);
-      } else {
-        cb(this.projects);
-      }
     },
 
     // eslint-disable-next-line no-unused-vars
@@ -286,11 +257,17 @@ export default {
       return companies;
     },
 
+    handleImport() {
+      ipcRenderer.send("importXLSX");
+    },
+
     handleExport() {
-      ipcRenderer.send(
-        "exportXLSX",
-        JSON.parse(JSON.stringify(this.tableData))
-      );
+      if (this.tableData.length) {
+        const data = JSON.parse(JSON.stringify(this.tableData));
+        ipcRenderer.send("exportXLSX", data);
+      } else {
+        this.$message.warning("当前没有任何数据！");
+      }
     }
   }
 };

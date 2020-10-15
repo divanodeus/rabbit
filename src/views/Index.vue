@@ -14,7 +14,18 @@
         <el-menu-item index="/remind">提醒</el-menu-item>
         <el-menu-item index="/manage">管理</el-menu-item>
       </el-menu>
-      <Poetry></Poetry>
+      <div class="flex-center mr5">
+        <Poetry></Poetry>
+        <span class="window_button" @click="windowMin">
+          <i class="el-icon-minus"></i>
+        </span>
+        <span class="window_button" @click="windowMax">
+          <i class="el-icon-copy-document"></i>
+        </span>
+        <span class="window_button" @click="windowClose">
+          <i class="el-icon-close"></i>
+        </span>
+      </div>
     </el-header>
     <el-main>
       <transition name="fade-transform" mode="out-in">
@@ -26,9 +37,21 @@
 
 <script>
 // @ is an alias to /src
+const { ipcRenderer } = require("electron");
 import Poetry from "@/components/Poetry";
 export default {
   name: "Home",
-  components: { Poetry }
+  components: { Poetry },
+  methods: {
+    windowMin() {
+      ipcRenderer.send("windowMin");
+    },
+    windowMax() {
+      ipcRenderer.send("windowMax");
+    },
+    windowClose() {
+      ipcRenderer.send("windowClose");
+    }
+  }
 };
 </script>

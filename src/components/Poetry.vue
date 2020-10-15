@@ -1,7 +1,10 @@
 <template>
-  <div class="poetry" @contextmenu="getPoetry">{{ poetry }}</div>
+  <div class="poetry" @dblclick="getPoetry" @contextmenu="copy">
+    {{ poetry }}
+  </div>
 </template>
 <script>
+const { clipboard } = require("electron");
 export default {
   name: "Poetry",
 
@@ -27,6 +30,11 @@ export default {
         .then(res => {
           this.poetry = `${res.content} —— ${res.author} 《${res.origin}》`;
         });
+    },
+
+    copy() {
+      clipboard.writeText(this.poetry);
+      this.$message.success("复制成功！");
     }
   }
 };
@@ -37,5 +45,6 @@ export default {
   font-size: 14px;
   user-select: none;
   padding-right: 20px;
+  -webkit-app-region: no-drag;
 }
 </style>

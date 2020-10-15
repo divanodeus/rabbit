@@ -1,4 +1,4 @@
-import moment from "moment";
+import _dayjs from "@/plugins/dayjs";
 
 const pickerOptins = {
   data() {
@@ -9,61 +9,31 @@ const pickerOptins = {
           {
             text: "今天",
             onClick(picker) {
-              const start = moment().toDate();
-              const end = moment().toDate();
-              picker.$emit("pick", [start, end]);
+              picker.$emit("pick", _dayjs.thisDay());
             }
           },
           {
             text: "本周",
             onClick(picker) {
-              const start = moment()
-                .day(1)
-                .toDate();
-              const end = moment()
-                .day(7)
-                .toDate();
-              picker.$emit("pick", [start, end]);
+              picker.$emit("pick", _dayjs.thisWeek());
             }
           },
           {
             text: "本月",
             onClick(picker) {
-              const start = moment()
-                .date(1)
-                .toDate();
-              const end = moment()
-                .date(1)
-                .add(1, "months")
-                .subtract(1, "days")
-                .toDate();
-              picker.$emit("pick", [start, end]);
+              picker.$emit("pick", _dayjs.thisMonth());
             }
           },
           {
             text: "上一周",
             onClick(picker) {
-              const start = moment()
-                .day(-6)
-                .toDate();
-              const end = moment()
-                .day(0)
-                .toDate();
-              picker.$emit("pick", [start, end]);
+              picker.$emit("pick", _dayjs.lastWeek());
             }
           },
           {
             text: "上一个月",
             onClick(picker) {
-              const start = moment()
-                .date(1)
-                .subtract(1, "months")
-                .toDate();
-              const end = moment()
-                .date(1)
-                .subtract(1, "days")
-                .toDate();
-              picker.$emit("pick", [start, end]);
+              picker.$emit("pick", _dayjs.lastMonth());
             }
           }
         ]

@@ -3,12 +3,12 @@
 import { app, protocol, BrowserWindow, Menu, dialog, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
-import XLSX from "xlsx";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
+let workerWin;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -18,9 +18,9 @@ protocol.registerSchemesAsPrivileged([
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    // frame: false, // 无框窗口
     width: 1200,
     height: 620,
+    frame: false,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -29,18 +29,31 @@ function createWindow() {
     }
   });
 
+  workerWin = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
-    if (!process.env.IS_TEST) win.webContents.openDevTools();
+    workerWin.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "/worker.html");
+    if (!process.env.IS_TEST) {
+      win.webContents.openDevTools();
+      workerWin.webContents.openDevTools();
+    }
   } else {
     createProtocol("app");
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
+    workerWin.loadURL("app://./worker.html");
   }
 
   win.on("closed", () => {
     win = null;
+    workerWin = null;
   });
 
   Menu.setApplicationMenu(null);
@@ -60,6 +73,7 @@ app.on("activate", () => {
   // dock icon is clicked and there are no other windows open.
   if (win === null) {
     createWindow();
+    workerWin.webContents.send("msg", "ssssss");
   }
 });
 
@@ -94,20 +108,54 @@ if (isDevelopment) {
   }
 }
 
-ipcMain.on("exportXLSX", async (event, arg) => {
-  let path = await dialog.showSaveDialog({
+// ipcMain 监听和发送相关
+
+ipcMain.on("windowMin", () => {
+  win.minimize();
+});
+ipcMain.on("windowMax", () => {
+  if (win.isMaximized()) {
+    win.unmaximize();
+  } else {
+    win.maximize();
+  }
+});
+ipcMain.on("windowClose", () => {
+  app.exit();
+});
+
+function sendWindowMessage(targetWindow, message, payload) {
+  if (typeof targetWindow === "undefined") {
+    console.log("Target Window does not exist");
+    return;
+  }
+  targetWindow.webContents.send(message, payload);
+}
+
+// eslint-disable-next-line
+ipcMain.on("exportXLSX", (event, arg) => {
+  const path = dialog.showSaveDialogSync({
     title: "导出数据",
     defaultPath: "导出数据.xlsx"
   });
-  if (!path.filePath) {
-    return;
-  }
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(arg);
-  XLSX.utils.book_append_sheet(workbook, worksheet);
-  XLSX.writeFile(workbook, `${path.filePath}`, {
-    bookType: "xlsx",
-    bookSST: true,
-    type: "array"
+  if (!path) return;
+  sendWindowMessage(workerWin, "export", {
+    path: path,
+    data: arg
   });
+});
+
+// eslint-disable-next-line
+ipcMain.on("importXLSX", (event, arg) => {
+  const path = dialog.showOpenDialogSync({
+    title: "导入数据",
+    filters: [{ name: "excel文件", extensions: ["xlsx", "xls"] }],
+    properties: ["openFile"]
+  });
+  if (!path) return;
+  sendWindowMessage(workerWin, "import", path);
+});
+
+ipcMain.on("processXLSX", (event, arg) => {
+  sendWindowMessage(win, "processXLSX", arg);
 });
