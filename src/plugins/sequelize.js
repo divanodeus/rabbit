@@ -12,8 +12,7 @@ const sequelize = new Sequelize({
     // timestamps: false,
     freezeTableName: true
   },
-  storage: "rabbit.db",
-  operatorsAliases: false
+  storage: "rabbit.db"
 });
 
 module.exports = sequelize;

@@ -21,6 +21,7 @@ body {
   font-family: SourceHanSansCN;
 
   height: 100vh;
+
 // 开启GPU渲染加速
 
   transform: translate3d(0,0,0);
@@ -42,15 +43,14 @@ body {
   margin-left: 10px;
 
   cursor: pointer;
+  transition: background-color, 333ms;
 
   color: #fff;
   border-radius: 2px;
 
-  transition: background-color, 333ms;
-
   -webkit-app-region: no-drag;
   &:hover {
-    background-color: rgba(255, 255, 255, .5);
+    background-color: rgba(255, 255, 255, 0.5);
   }
 }
 

@@ -55,6 +55,23 @@ const _dayjs = {
       .endOf("month")
       .toDate();
     return [start, end];
+  },
+
+  getDates(key) {
+    switch (key) {
+      case "thisDay":
+        return this.thisDay();
+      case "thisWeek":
+        return this.thisWeek();
+      case "thisMonth":
+        return this.thisMonth();
+      case "lastWeek":
+        return this.lastWeek();
+      case "lastMonth":
+        return this.lastMonth();
+      default:
+        return null;
+    }
   }
 };
 

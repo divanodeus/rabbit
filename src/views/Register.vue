@@ -95,6 +95,7 @@
       stripe
       size="mini"
       height="100%"
+      highlight-current-row
       @row-dblclick="handleEditEven"
     >
       <el-table-column
@@ -215,23 +216,18 @@ export default {
 
   created() {
     this.params.dateTime = _dayjs.thisMonth();
+    ipcRenderer.on("process_xlsx", (event, arg) => {
+      if (!this.loading) this.loading = true;
+      this.loadingText = arg;
+    });
+  },
+
+  beforeDestroy() {
+    ipcRenderer.removeAllListeners("process_xlsx");
   },
 
   mounted() {
     this.search();
-    ipcRenderer.on("processXLSX", (event, arg) => {
-      if (!arg || typeof arg === "number") {
-        this.loading = false;
-        this.loadingText = "";
-        if (arg === 200) {
-          this.initCompanies();
-          this.search();
-        }
-      } else {
-        if (!this.loading) this.loading = true;
-        this.loadingText = arg;
-      }
-    });
   },
 
   methods: {
@@ -258,13 +254,30 @@ export default {
     },
 
     handleImport() {
-      ipcRenderer.send("importXLSX");
+      ipcRenderer.invoke("importXLSX").then(res => {
+        if (res) {
+          ipcRenderer.once("import_success", () => {
+            this.loading = false;
+            this.loadingText = "";
+            this.initCompanies();
+            this.search();
+          });
+        }
+      });
     },
 
     handleExport() {
       if (this.tableData.length) {
         const data = JSON.parse(JSON.stringify(this.tableData));
-        ipcRenderer.send("exportXLSX", data);
+        ipcRenderer.invoke("exportXLSX", data).then(res => {
+          if (res) {
+            ipcRenderer.once("export_success", () => {
+              this.loading = false;
+              this.loadingText = "";
+              this.$message.success("导出成功！");
+            });
+          }
+        });
       } else {
         this.$message.warning("当前没有任何数据！");
       }

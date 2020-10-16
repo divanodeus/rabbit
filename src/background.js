@@ -73,7 +73,6 @@ app.on("activate", () => {
   // dock icon is clicked and there are no other windows open.
   if (win === null) {
     createWindow();
-    workerWin.webContents.send("msg", "ssssss");
   }
 });
 
@@ -133,29 +132,34 @@ function sendWindowMessage(targetWindow, message, payload) {
 }
 
 // eslint-disable-next-line
-ipcMain.on("exportXLSX", (event, arg) => {
-  const path = dialog.showSaveDialogSync({
+ipcMain.handle("exportXLSX", (event, arg) => {
+  const path = dialog.showSaveDialog({
     title: "导出数据",
     defaultPath: "导出数据.xlsx"
   });
-  if (!path) return;
-  sendWindowMessage(workerWin, "export", {
-    path: path,
-    data: arg
-  });
+  if (path) {
+    sendWindowMessage(workerWin, "export", {
+      path: path,
+      data: arg,
+      id: win.id
+    });
+    return true;
+  } else {
+    return;
+  }
 });
 
 // eslint-disable-next-line
-ipcMain.on("importXLSX", (event, arg) => {
+ipcMain.handle("importXLSX", (event, arg) => {
   const path = dialog.showOpenDialogSync({
     title: "导入数据",
     filters: [{ name: "excel文件", extensions: ["xlsx", "xls"] }],
     properties: ["openFile"]
   });
-  if (!path) return;
-  sendWindowMessage(workerWin, "import", path);
-});
-
-ipcMain.on("processXLSX", (event, arg) => {
-  sendWindowMessage(win, "processXLSX", arg);
+  if (path) {
+    sendWindowMessage(workerWin, "import", { id: win.id, path });
+    return true;
+  } else {
+    return;
+  }
 });

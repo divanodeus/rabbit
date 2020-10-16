@@ -41,10 +41,18 @@ export default {
 </script>
 <style lang="less" scoped>
 .poetry {
-  color: #fff;
   font-size: 14px;
-  user-select: none;
+
+  overflow: hidden;
+
   padding-right: 20px;
+
+  user-select: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #fff;
+
   -webkit-app-region: no-drag;
 }
 </style>

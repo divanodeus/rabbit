@@ -13,9 +13,7 @@ const _enum = {
   READ_FILE: "正在读取文件，请稍等...",
   PARSING: "文件读取成功，正在解析...",
   IMPORT: "解析成功，正在导入...",
-  EXPORT: "正在导出...",
-  IMPORT_SUCCESS: 200,
-  EXPORT_SUCCESS: 201
+  EXPORT: "正在导出..."
 };
 
 function convertArray(str) {
@@ -98,10 +96,10 @@ async function handleImport(workbook_json) {
   }
 }
 
-export const importXLXS = async path => {
-  ipcRenderer.send("processXLSX", _enum.READ_FILE);
+export const importXLXS = async ({ id, path }) => {
+  ipcRenderer.sendTo(id, "process_xlsx", _enum.READ_FILE);
   const workbook = XLSX.readFile(path[0], { type: "file" });
-  ipcRenderer.send("processXLSX", _enum.PARSING);
+  ipcRenderer.sendTo(id, "process_xlsx", _enum.PARSING);
   const workbook_json = XLSX.utils.sheet_to_json(
     workbook.Sheets[workbook.SheetNames[0]],
     {
@@ -122,13 +120,13 @@ export const importXLXS = async path => {
     }
   );
   workbook_json.shift();
-  ipcRenderer.send("processXLSX", _enum.IMPORT);
+  ipcRenderer.sendTo(id, "process_xlsx", _enum.IMPORT);
   await handleImport(workbook_json);
-  ipcRenderer.send("processXLSX", _enum.IMPORT_SUCCESS);
+  ipcRenderer.sendTo(id, "import_success");
 };
 
-export const exportXLSX = ({ path, data }) => {
-  ipcRenderer.send("processXLSX", _enum.EXPORT);
+export const exportXLSX = ({ path, data, id }) => {
+  ipcRenderer.sendTo(id, "process_xlsx", _enum.EXPORT);
   const header = {
     dateTime: "时间",
     companies: "公司",
@@ -160,5 +158,5 @@ export const exportXLSX = ({ path, data }) => {
     XLSX.utils.book_append_sheet(workbook, worksheet, name);
   }
   XLSX.writeFile(workbook, `${path}`);
-  ipcRenderer.send("processXLSX", _enum.EXPORT_SUCCESS);
+  ipcRenderer.sendTo(id, "export_success");
 };

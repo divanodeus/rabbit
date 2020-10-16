@@ -1,9 +1,9 @@
 <template>
   <el-container class="app">
-    <el-header>
+    <el-header :class="{ 'mat-elevation-z4': $route.name === 'Home' }">
       <el-menu
         router
-        class="transparent"
+        class="transparent flex-none"
         :default-active="$route.path"
         mode="horizontal"
         text-color="#fff"
@@ -14,7 +14,7 @@
         <el-menu-item index="/remind">提醒</el-menu-item>
         <el-menu-item index="/manage">管理</el-menu-item>
       </el-menu>
-      <div class="flex-center mr5">
+      <div class="flex justify-end align-center mr5">
         <Poetry></Poetry>
         <span class="window_button" @click="windowMin">
           <i class="el-icon-minus"></i>

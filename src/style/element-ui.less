@@ -1,19 +1,25 @@
 .el-header {
-  padding: 0;
-  background: #f7889c linear-gradient(-90deg, #a050d7 0, #f7889c 100%);
-  background-color: #f7889c;
-  border-top-color: #a050d7;
-  border-bottom-color: #ffebf8;
-  height: 100%;
-  width: 100%;
+  z-index: 1;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  width: 100%;
+  height: 100%;
+  padding: 0;
+
+  border-top-color: #a050d7;
+  border-bottom-color: #ffebf8;
+  background: #f7889c linear-gradient(-90deg, #a050d7 0, #f7889c 100%);
+  background-color: #f7889c;
+
   -webkit-app-region: drag;
 }
 
 .el-main {
   overflow: hidden;
+
   padding: 0;
 }
 
@@ -21,12 +27,16 @@
   -webkit-app-region: no-drag;
 }
 
-.el-menu--horizontal>.el-menu-item:not(.is-disabled):focus {
+.el-menu.el-menu--horizontal {
+  border-bottom: none;
+}
+
+.el-menu--horizontal > .el-menu-item:not(.is-disabled):focus {
   background: none;
 }
-.el-menu--horizontal>.el-menu-item:not(.is-disabled):hover,
-.el-menu--horizontal>.el-submenu .el-submenu__title:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+.el-menu--horizontal > .el-menu-item:not(.is-disabled):hover,
+.el-menu--horizontal > .el-submenu .el-submenu__title:hover {
+  background-color: rgba(0, 0, 0, .2);
 }
 
 .el-select {
@@ -37,7 +47,8 @@
   width: 100%;
 }
 
-.el-tabs__content, .el-tab-pane {
+.el-tabs__content,
+.el-tab-pane {
   height: 100%;
 }
 

@@ -1,42 +1,43 @@
 <template>
   <Layout class="page">
     <template #header>
-      <div class="dashboard flex pa2 mx2 mat-elevation-z2">
-        <div :span="3" class="count flex-center flex-column ">
-          <span class="count-title">本月登记</span>
-          <span class="count-number">{{ thisMonth }}</span>
-        </div>
-        <div :span="3" class="count flex-center flex-column">
-          <span class="count-title">本周登记</span>
-          <span class="count-number">{{ thisWeek }}</span>
-        </div>
-        <div :span="3" class="count flex-center flex-column">
-          <span class="count-title">本日登记</span>
-          <span class="count-number">{{ thisDay }}</span>
-        </div>
-      </div>
+      <el-row :gutter="20" type="flex" justify="center">
+        <el-col :span="3">
+          <Count type="thisDay"></Count>
+        </el-col>
+        <el-col :span="3">
+          <Count type="thisWeek"></Count>
+        </el-col>
+        <el-col :span="3">
+          <Count type="thisMonth"></Count>
+        </el-col>
+        <el-col :span="3">
+          <Count type="lastWeek"></Count>
+        </el-col>
+        <el-col :span="3">
+          <Count type="lastMonth"></Count>
+        </el-col>
+        <el-col :span="3">
+          <Count type="all"></Count>
+        </el-col>
+      </el-row>
     </template>
     <template>
-      <div class="flex height_full mx2">
-        <div id="echarts_pie" class="echarts"></div>
-        <div></div>
-      </div>
+      <Pie></Pie>
     </template>
   </Layout>
 </template>
 <script>
-const throttle = require("lodash/throttle");
-const echarts = require("echarts");
-require("echarts/theme/macarons");
-import { countRegister, countRegisterGroupByCompany } from "@/plugins/service";
-import pie from "@/plugins/echarts/pie";
-import _dayjs from "@/plugins/dayjs";
 import Layout from "@/components/Layout";
+import Count from "@/components/Count";
+import Pie from "@/components/Pie";
 export default {
   name: "Home",
 
   components: {
-    Layout
+    Layout,
+    Count,
+    Pie
   },
 
   data() {
@@ -47,90 +48,21 @@ export default {
     };
   },
 
-  created() {
-    this.count("thisDay");
-    this.count("thisWeek");
-    this.count("thisMonth");
-  },
+  created() {},
 
-  mounted() {
-    this.handleEchartsPie();
-  },
+  mounted() {},
 
-  methods: {
-    count(type) {
-      let params = _dayjs[type]();
-      countRegister(params)
-        .then(result => {
-          this[type] = result;
-        })
-        .catch(err => {
-          this.$message.error(err.message);
-        });
-    },
-
-    handleEchartsPie() {
-      const dom = document.querySelector("#echarts_pie");
-      let _echarts = echarts.init(dom, "macarons");
-      _echarts.setOption(pie);
-
-      this.handleResizeObserver(_echarts, dom);
-
-      countRegisterGroupByCompany()
-        .then(([result]) => {
-          _echarts.setOption({
-            series: [{ data: result.reverse() }]
-          });
-        })
-        .catch(err => {
-          this.$message.error(err.message);
-        });
-    },
-
-    handleResizeObserver(_echarts, dom) {
-      const resizeObserver = new ResizeObserver(
-        throttle(() => {
-          _echarts.resize();
-        }, 500)
-      );
-      resizeObserver.observe(dom);
-      this.$once("hook:beforeDestroy", () => {
-        resizeObserver.disconnect();
-      });
-    }
-  }
+  methods: {}
 };
 </script>
 <style lang="less" scoped>
 .page {
-  background-color: #f6f6f6;
+  background-image: linear-gradient(
+    to top,
+    #1e3c72 0%,
+    #1e3c72 1%,
+    #2a5298 100%
+  );
 }
-.dashboard {
-  border-radius: 4px;
-  background-color: #fff;
-  .count {
-    color: #f7889c;
-    position: relative;
-    width: 100px;
-    &-title {
-      font-size: 14px;
-    }
-    &-number {
-      font-size: 24px;
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 2px;
-      height: 100%;
-      background-image: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
-    }
-  }
-}
-.echarts {
-  height: 100%;
-  width: 100%;
-}
+// dashboard
 </style>

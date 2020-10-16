@@ -36,25 +36,40 @@ export const queryRegister = (params, chosenCompanies) => {
   });
 };
 
-export const countRegister = params => {
+export const countRegister = dates => {
+  let params = {};
+  if (dates) {
+    params.dateTime = { [Op.between]: dates };
+  }
   return Register.count({
-    where: {
-      dateTime: {
-        [Op.between]: params
-      }
-    }
+    where: params
   });
 };
 
-export const countRegisterGroupByCompany = () => {
-  return sequelize.query(
-    `select count(rc.companyId) as value, c.company as name
-    from register_company rc
-             join company c on c.id = rc.companyId
-    group by rc.companyId
-    order by value desc
-    limit 10`
-  );
+export const countRegisterGroupByCompany = dates => {
+  let params = {};
+  if (dates) {
+    params.dateTime = { [Op.between]: dates };
+  }
+  return Company.findAll({
+    raw: true,
+    group: "company",
+    attributes: [
+      ["company", "name"],
+      [sequelize.fn("COUNT", sequelize.col("registerId")), "value"]
+    ],
+    include: [
+      {
+        model: Register,
+        attributes: [],
+        through: {
+          attributes: []
+        },
+        where: params
+      }
+    ],
+    order: [[sequelize.literal("value"), "DESC"]]
+  });
 };
 
 export const queryCompaniesWithSelect = () => {
