@@ -133,20 +133,17 @@ function sendWindowMessage(targetWindow, message, payload) {
 
 // eslint-disable-next-line
 ipcMain.handle("exportXLSX", (event, arg) => {
-  const path = dialog.showSaveDialog({
+  const path = dialog.showSaveDialogSync({
     title: "导出数据",
     defaultPath: "导出数据.xlsx"
   });
-  if (path) {
-    sendWindowMessage(workerWin, "export", {
-      path: path,
-      data: arg,
-      id: win.id
-    });
-    return true;
-  } else {
-    return;
-  }
+  if (!path) return
+  sendWindowMessage(workerWin, "export", {
+    path: path,
+    data: arg,
+    id: win.id
+  });
+  return true;
 });
 
 // eslint-disable-next-line
@@ -156,10 +153,7 @@ ipcMain.handle("importXLSX", (event, arg) => {
     filters: [{ name: "excel文件", extensions: ["xlsx", "xls"] }],
     properties: ["openFile"]
   });
-  if (path) {
-    sendWindowMessage(workerWin, "import", { id: win.id, path });
-    return true;
-  } else {
-    return;
-  }
+  if (!path) return;
+  sendWindowMessage(workerWin, "import", { id: win.id, path });
+  return true;
 });
